@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="stylesheet" href="./css/reset.css" />
+    <link rel="stylesheet" href="./css/editPic.css" />
+    <script src="./js/rem.js"></script>
+    <script src="./js/touch-0.2.14.min.js"></script>
+    <script src="./js/editPic/editPic.js"></script>
+    <script src="./js/jquery.min.js"></script>
+    <script src="./js/editPic/CanvasSwiper.js"></script>
+    <title>DEMO</title>
+  </head>
+  <body>
+    <div class="frame-wrap">
+      <div id="picBox"></div>
+      <div class="upload-wrap">
+        <label class="add">
+          <input type="file" accept="image/*" class="file" style="display: none;" />
+          <div class="add-text">添加照片</div>
+        </label>
+      </div>
+      <div class="remove-pic">
+        <img style="width: 100%;height: 100%;" src="./image/editPic/cancal.png" />
+      </div>
+    </div>
+    <!-- 背景 -->
+    <ul class="status-group">
+      <li id="sunshine" class="status-active">操作1</li>
+      <li id="paster">操作2</li>
+      <li id="therange">操作3</li>
+    </ul>
+    <div class="sunshine-group-wall">
+      <ul class="sunshine-group">
+        <li>
+          <div class="sunshine-pic-warp addFullPic"><img src="./image/editPic/btn-sun2.png" /></div>
+          <div>按钮1</div>
+        </li>
+        <li>
+          <div class="sunshine-pic-warp addAutoPic"><img src="./image/editPic/btn-sun3.png" /></div>
+          <div>按钮2</div>
+        </li>
+        <li class="sunshine-active">
+          <div class="sunshine-pic-warp clearCanvas"><img src="./image/editPic/btn-sun1.png" alt /></div>
+          <div>清空</div>
+        </li>
+      </ul>
+    </div>
+    <!-- 贴字 -->
+    <div class="paster-group-wall">
+      <ul class="paster-group">
+        <li class="paster-active clearCanvasIcon">
+          <div class="paster-pic-warp"><img src="./image/editPic/btn-sun1.png" alt /></div>
+          <div>清空选择</div>
+        </li>
+        <li class="addTextIcon-d">
+          <div class="paster-pic-warp"><img src="./image/editPic/btn-text4.png" alt /></div>
+          <div>按钮1</div>
+        </li>
+        <li class="addTextIcon-e">
+          <div class="paster-pic-warp"><img src="./image/editPic/btn-text5.png" alt /></div>
+          <div>按钮2</div>
+        </li>
+
+        <li class="addTextIcon-a">
+          <div class="paster-pic-warp"><img src="./image/editPic/btn-text1.png" alt /></div>
+          <div>按钮3</div>
+        </li>
+        <li class="addTextIcon-c">
+          <div class="paster-pic-warp"><img src="./image/editPic/btn-text3.png" /></div>
+          <div>按钮4</div>
+        </li>
+        <li class="addTextIcon-my">
+          <div class="paster-pic-warp"><img src="./image/editPic/byself.png" /></div>
+          <div>自定义</div>
+        </li>
+      </ul>
+    </div>
+    <!-- 滚动条 -->
+    <div class="range-wall">
+      <div id="range1" class="my-range"></div>
+    </div>
+    <!-- 提交 -->
+    <div id="toAddBtn" class="add-btn">
+      <div>确认保存</div>
+    </div>
+    <!-- loading条 -->
+    <div class="loading-bar">
+      <div class="loading-wrap"></div>
+      <div class="loadEffect">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+    <!-- 提示框 -->
+    <div class="hint-modal">
+      <div class="hint-wrap"></div>
+      <div class="hint-box">
+        <div class="hint-text-a"><img src="./image/editPic/success.png" alt /></div>
+        <div class="hint-text-b">提交成功</div>
+        <div class="hint-text-c">这里没有外链哦</div>
+      </div>
+    </div>
+    <!-- 自定义文字输入框 -->
+    <div class="mytext-modal">
+      <div class="mytext-wrap"></div>
+      <div class="mytext-box">
+        <div class="mytext-text-a">自定义编辑</div>
+        <div class="mytext-text-b">
+          <input id="myEntry" type="text" placeholder="请输入你要的文字" maxlength="16" />
+        </div>
+        <div class="mytext-text-c">*仅限16个字符号</div>
+        <button class="mytext-text-btn">确定</button>
+        <div class="mytext-text-cancle">x</div>
+      </div>
+    </div>
+    <div class="updata-modal">
+      <div class="pic-cut-mask"></div>
+      <div class="pic-cut-box">
+        <div class="pic-cut-area">
+          <!-- <img src="./image/editPic/pic1.jpg" alt="" crossorigin="anonymous" /> -->
+        </div>
+        <div class="pic-cut-btns">
+          <button class="pic-cut-btna">取消</button>
+          <button class="pic-cut-btnc">翻转</button>
+          <button class="pic-cut-btnb">确定</button>
+        </div>
+      </div>
+    </div>
+    <div><img style="width: 100%;height: 100%;" class="outputPic" src="" alt=""></div>
+    <script>
+      var userInfo = null;
+      var userNowCity = '';
+      var loadingoff = false;
+      var submitTimer = null;
+    </script>
+  </body>
+</html>
