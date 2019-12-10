@@ -26,6 +26,59 @@ window.onload = function () {
     $('.upload-wrap').show();
     $('.remove-pic').hide();
   });
+  //图片文件转md5哈希值
+  var running = false; //running用于判断是否正在计算md5
+  function doNormalTest(file, callback) {
+    //这里假设直接将文件选择框的dom引用传入
+    if (running) {
+      // 如果正在计算、不允许开始下一次计算
+      return;
+    }
+    var fileReader = new FileReader(), //创建FileReader实例
+      time;
+    fileReader.onload = function (e) {
+      //FileReader的load事件，当文件读取完毕时触发
+      running = false;
+      // e.target指向上面的fileReader实例
+      if (file.size != e.target.result.length) {
+        //如果两者不一致说明读取出错
+        alert('ERROR:Browser reported success but could not read the file until the end.');
+      } else {
+        const resdome = SparkMD5.hashBinary(e.target.result);
+        callback && callback(resdome);
+        // return resdome;    //计算md5并返回结果
+      }
+    };
+    fileReader.onerror = function () {
+      //如果读取文件出错，取消读取状态并弹框报错
+      running = false;
+      alert('ERROR:FileReader onerror was triggered, maybe the browser aborted due to high memory usage.');
+    };
+    running = true;
+    fileReader.readAsBinaryString(file); //通过fileReader读取文件二进制码
+  }
+  //url图片转base64
+  function getBase64(img) {
+    function getBase64Image(img, width, height) {
+      var canvas = document.createElement("canvas");
+      $('.frame-wrap').append(canvas);
+      canvas.width = width ? width : img.width;
+      canvas.height = height ? height : img.height;
+      canvas.style.display = 'none';
+      var ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      var dataURL = canvas.toDataURL();
+      return dataURL;
+    }
+    var image = new Image();
+    image.crossOrigin = 'anonymous';
+    image.src = img;
+    return new Promise((resolve, reject) => {
+      image.onload = function () {
+        resolve(getBase64Image(image));//将base64传给done上传处理
+      }
+    });
+  };
   //将base64转换为文件对象
   function dataURLtoFile(dataurl, filename) {
     var arr = dataurl.split(',');
@@ -100,33 +153,30 @@ window.onload = function () {
   });
 
   function addSunText() {
-    canvas.addPhotoIcon({
+    return canvas.addPhotoIcon({
       url: 'image/editPic/thesunText.png',
       model: 70,
       customPosX: '222',
       customPosY: '20',
-      callback: function () {
-        console.log('成功添加一束光');
-      }
+    }).then(res => {
+      console.log('成功添加一束光');
     });
   }
   function addTimeCity() {
     let textCity = userNowCity || '中国';
     let textCityLen = 90 + Math.max(textCity.length - 2, 0) * 13;
-    canvas.toDataURLTimeCy({
-      callback: function (url) {
-        // $('.outputPic').attr('src', url);
-        canvas.addPhoto({
-          url: url,
-          model: textCityLen,
-          customPosX: '6',
-          customPosY: '360',
-          callback: function () {
-            console.log('成功添加打卡地点');
-            $('.loading-bar').hide();
-          }
-        });
-      }
+    return canvas.toDataURLTimeCy({
+    }).then(url => {
+      // $('.outputPic').attr('src', url);
+      canvas.addPhoto({
+        url: url,
+        model: textCityLen,
+        customPosX: '6',
+        customPosY: '360'
+      })
+    }).then(res => {
+      console.log('成功添加打卡地点');
+      $('.loading-bar').hide();
     });
   }
   //自定义文字录入
@@ -134,24 +184,35 @@ window.onload = function () {
     let textItem = item;
     let textLen = 90 + Math.min(Math.max(textItem.length - 2, 0) * 13, 180);
     canvas.toDataURLMyEntry({
-      value: item,
-      callback: function (url) {
-        // $('.outputPic').attr('src', url);
-        canvas.addPhotoIcon({
-          url: url,
-          model: textLen,
-          customPosX: '90',
-          customPosY: '200',
-          callback: function () {
-            console.log('成功添加自定义文字');
-            addSunText();
-            // $('.loading-bar').hide();
-          }
-        });
-      }
+      value: item
+    }).then(url => {
+      // $('.outputPic').attr('src', url);
+      canvas.addPhotoIcon({
+        url: url,
+        model: textLen,
+        customPosX: '90',
+        customPosY: '200'
+      })
+    }).then(res => {
+      console.log('成功添加自定义文字');
+      addSunText();
+      // $('.loading-bar').hide();
     });
   }
   // 默认为covered铺满，为数字时为固定宽度，adaption为自适应，enable：是否禁止编辑
+  // 添加光晕函数
+  function addSunshineFn(numa, numb) {
+    canvas.clearCanvas();
+    canvas.addPhoto({
+      url: numb,
+      model: numa,
+      customPosX: '-80',
+      customPosY: '-120'
+    }).then(res => {
+      console.log('成功添加光晕');
+      addTimeCity();
+    });
+  }
   // 添加光晕A
   $('.addFullPic').click(function () {
     if (loadingoff) {
@@ -159,107 +220,50 @@ window.onload = function () {
     } else {
       return;
     }
-    canvas.clearCanvas();
-    canvas.addPhoto({
-      url: 'image/editPic/asunshiny.png',
-      model: 'adaption',
-      customPosX: '-80',
-      customPosY: '-120',
-      callback: function () {
-        console.log('成功添加光晕A');
-        addTimeCity();
-      }
-    });
+    addSunshineFn('adaption', 'image/editPic/asunshiny.png');
   });
   // 添加光晕B
   $('.addAutoPic').click(function () {
+
     if (loadingoff) {
       $('.loading-bar').show();
     } else {
       return;
     }
-    canvas.clearCanvas();
-    canvas.addPhoto({
-      url: 'image/editPic/asunshinyb.png',
-      model: 'adaption',
-      customPosX: '-80',
-      customPosY: '-120',
-      callback: function () {
-        console.log('成功添加光晕B');
-        addTimeCity();
-      }
-    });
+    addSunshineFn('adaption', 'image/editPic/asunshinyb.png');
   });
-
-  // 添加文字A
-  $('.addTextIcon-a').click(function () {
+  // 添加文字函数
+  function addTextFn(numa, numb) {
     canvas.clearCanvasIcon();
     canvas.addPhotoIcon({
-      url: 'image/editPic/goodMorning.png',
-      model: 100,
+      url: numb,
+      model: numa,
       customPosX: '90',
-      customPosY: '180',
-      callback: function () {
-        console.log('成功添加文字A');
-        addSunText();
-      }
+      customPosY: '180'
+    }).then(res => {
+      console.log('成功添加文字');
+      addSunText();
     });
+  }
+  // 添加文字A
+  $('.addTextIcon-a').click(function () {
+    addTextFn(100, 'image/editPic/goodMorning.png');
   });
   // 添加文字B
   $('.addTextIcon-b').click(function () {
-    canvas.clearCanvasIcon();
-    canvas.addPhotoIcon({
-      url: 'image/editPic/lonely.png',
-      model: 140,
-      customPosX: '90',
-      customPosY: '180',
-      callback: function () {
-        console.log('成功添加文字B');
-        addSunText();
-      }
-    });
+    addTextFn(140, 'image/editPic/lonely.png');
   });
   // 添加文字C
   $('.addTextIcon-c').click(function () {
-    canvas.clearCanvasIcon();
-    canvas.addPhotoIcon({
-      url: 'image/editPic/revive.png',
-      model: 100,
-      customPosX: '90',
-      customPosY: '180',
-      callback: function () {
-        console.log('成功添加文字C');
-        addSunText();
-      }
-    });
+    addTextFn(100, 'image/editPic/revive.png');
   });
   // 添加文字D
   $('.addTextIcon-d').click(function () {
-    canvas.clearCanvasIcon();
-    canvas.addPhotoIcon({
-      url: 'image/editPic/faceNight.png',
-      model: 100,
-      customPosX: '90',
-      customPosY: '180',
-      callback: function () {
-        console.log('成功添加文字D');
-        addSunText();
-      }
-    });
+    addTextFn(100, 'image/editPic/faceNight.png');
   });
   // 添加文字E
   $('.addTextIcon-e').click(function () {
-    canvas.clearCanvasIcon();
-    canvas.addPhotoIcon({
-      url: 'image/editPic/eye-fly.png',
-      model: 80,
-      customPosX: '90',
-      customPosY: '180',
-      callback: function () {
-        console.log('成功添加文字E');
-        addSunText();
-      }
-    });
+    addTextFn(80, 'image/editPic/eye-fly.png');
   });
   // 添加自定义文字
   $('.addTextIcon-my').click(function () {
@@ -286,11 +290,10 @@ window.onload = function () {
     canvasCut.clearCanvas();
     canvasCut.addPhoto({
       url: getUrl(this.files[0]),
-      model: 'adaption',
-      callback: function () {
-        console.log('成功添加背景图');
-        $('.file').val('');
-      }
+      model: 'adaption'
+    }).then(res => {
+      console.log('成功添加背景图');
+      $('.file').val('');
     });
   });
 
@@ -318,37 +321,40 @@ window.onload = function () {
   $('.pic-cut-btnb').click(function () {
     canvasCut.toDataURL({
       type: 'image/png',
-      callback: function (url) {
-        $('.updata-modal').hide();
-        $('.upload-wrap').hide();
-        $('.loading-bar').show();
-        $('.remove-pic').show();
-        canvas.clearCanvas();
-        canvas.clearCanvasIcon();
-        canvas.hueScale = 0;
-        canvas.changeBg({
-          photoSrc: url,
-          model: 'covered',
-          callback: function () {
-            console.log('成功添加剪切图');
-            canvas.clearCanvas();
-            canvas.addPhoto({
-              url: 'image/editPic/asunshiny.png',
-              model: 'adaption',
-              customPosX: '-80',
-              customPosY: '-120',
-              callback: function () {
-                console.log('成功添加光晕A');
-                addTimeCity();
-                addSunText();
-                $('.add-btn').css('background-color', '#b81657');
-                loadingoff = true;
-                $('.loading-bar').hide();
-              }
-            });
-          }
-        });
-      }
+    }).then(url => {
+      $('.updata-modal').hide();
+      $('.upload-wrap').hide();
+      $('.loading-bar').show();
+      $('.remove-pic').show();
+      canvas.clearCanvas();
+      canvas.clearCanvasIcon();
+      canvas.hueScale = 0;
+      return canvas.changeBg({
+        photoSrc: url,
+        model: 'covered',
+      })
+    }).then(res => {
+      console.log(res, 'changeBg');
+      console.log('成功添加剪切图');
+      canvas.clearCanvas();
+      return canvas.addPhoto({
+        url: 'image/editPic/asunshiny.png',
+        model: 'adaption',
+        customPosX: '-80',
+        customPosY: '-120',
+      });
+    }).then(res => {
+      console.log(res, 'addPhoto');
+      console.log('成功添加光晕A');
+      return Promise.all([addTimeCity(), addSunText()]);
+    }).then(res => {
+      console.log(res, 'Promise.all');
+      $('.add-btn').css('background-color', '#b81657');
+      loadingoff = true;
+      $('.loading-bar').hide();
+    }).catch(e => {
+      console.log(e, 'reject-e')
+      console.log('错误提示')
     });
   });
 
@@ -376,20 +382,18 @@ window.onload = function () {
       });
     }, 30000);
     canvas.toDataURL({
-      type: 'image/jpeg',
-      callback: function (url) {
-        console.log('成功输出1倍jpg图');
-        //再次贴图
-        canvas.toDataURLWrap({
-          src: url,
-          callback: function (url) {
-            $('.outputPic').attr('src', url);
-            var imgFile = dataURLtoFile(url, 'file');
-            var formData = new FormData();
-            formData.append('file', imgFile);
-          }
-        });
-      }
+      type: 'image/jpeg'
+    }).then(url => {
+      console.log('成功输出1倍jpg图');
+      //再次贴图
+      canvas.toDataURLWrap({
+        src: url
+      });
+    }).then(url => {
+      $('.outputPic').attr('src', url);
+      var imgFile = dataURLtoFile(url, 'file');
+      var formData = new FormData();
+      formData.append('file', imgFile);
     });
   });
 

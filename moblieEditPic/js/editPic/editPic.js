@@ -543,23 +543,28 @@
     var newPhoto = new Image();
     newPhoto.crossOrigin = 'anonymous'; // 跨域图片
     newPhoto.src = obj.url;
-
-    newPhoto.onload = function () {
-      var photo = new Photo({
-        canvas: self,
-        ele: newPhoto,
-        enable: obj.enable,
-        customPosX: obj.customPosX || self.customPosX,
-        customPosY: obj.customPosY || self.customPosY,
-        model: obj.model || self.photoModel
-      });
-      self.photos.push(photo);
-      self.targetPhoto = photo;
-      photo.init(function (photo) {
-        // 加载图片完成的回调并返回图片对象
-        obj.callback && obj.callback(photo);
-      });
-    };
+    return new Promise((resolve, reject) => {
+      newPhoto.onload = function () {
+        var photo = new Photo({
+          canvas: self,
+          ele: newPhoto,
+          enable: obj.enable,
+          customPosX: obj.customPosX || self.customPosX,
+          customPosY: obj.customPosY || self.customPosY,
+          model: obj.model || self.photoModel
+        });
+        self.photos.push(photo);
+        self.targetPhoto = photo;
+        photo.init(function (photo) {
+          // 加载图片完成的回调并返回图片对象
+          // obj.callback && obj.callback(photo);
+          resolve(photo);
+        });
+      };
+      newPhoto.onerror = function (e) {
+        reject(e)
+      };
+    });
   };
 
   /*添加icon图片传入参数为图片参数2*/
@@ -568,22 +573,29 @@
     var newPhoto = new Image();
     newPhoto.crossOrigin = 'anonymous'; // 跨域图片
     newPhoto.src = obj.url;
-    newPhoto.onload = function () {
-      var photo = new Photo({
-        canvas: self,
-        ele: newPhoto,
-        enable: obj.enable,
-        customPosX: obj.customPosX || self.customPosX,
-        customPosY: obj.customPosY || self.customPosY,
-        model: obj.model || self.photoModel
-      });
-      self.photoIcons.push(photo);
-      self.targetPhotoIcon = photo;
-      photo.init(function (photo) {
-        // 加载图片完成的回调并返回图片对象
-        obj.callback && obj.callback(photo);
-      });
-    };
+    return new Promise((resolve, reject) => {
+      newPhoto.onload = function () {
+        var photo = new Photo({
+          canvas: self,
+          ele: newPhoto,
+          enable: obj.enable,
+          customPosX: obj.customPosX || self.customPosX,
+          customPosY: obj.customPosY || self.customPosY,
+          model: obj.model || self.photoModel
+        });
+        self.photoIcons.push(photo);
+        self.targetPhotoIcon = photo;
+        photo.init(function (photo) {
+          // 加载图片完成的回调并返回图片对象
+          // obj.callback && obj.callback(photo);
+          resolve(photo);
+        });
+      };
+      newPhoto.onerror = function (e) {
+        reject(e)
+      };
+    });
+
   };
 
   // 更换背景图
@@ -602,25 +614,36 @@
       let newPhoto = new Image();
       newPhoto.crossOrigin = 'anonymous'; // 跨域图片
       newPhoto.src = bg.photoSrc;
-      newPhoto.onload = function () {
-        var photo = new Photo({
-          canvas: self,
-          ele: newPhoto,
-          enable: bg.enable,
-          customPosX: bg.customPosX || self.customPosX,
-          customPosY: bg.customPosY || self.customPosY,
-          model: bg.model || self.photoModel
-        });
-        self.bgPhoto = photo;
-        console.log(self.bgPhoto, 'self.bgPhoto');
-        self.bgPhotoType = true;
-        photo.init(function (photo) {
-          // 加载图片完成的回调并返回图片对象
-          // self.width=self.width/self.devicRatio;
-          // self.height=self.height/self.devicRatio;
-          bg.callback && bg.callback(photo);
-        });
-      };
+
+      return new Promise((resolve, reject) => {
+        newPhoto.onload = function () {
+          var photo = new Photo({
+            canvas: self,
+            ele: newPhoto,
+            enable: bg.enable,
+            customPosX: bg.customPosX || self.customPosX,
+            customPosY: bg.customPosY || self.customPosY,
+            model: bg.model || self.photoModel
+          });
+          self.bgPhoto = photo;
+          console.log(self.bgPhoto, 'self.bgPhoto');
+          self.bgPhotoType = true;
+          photo.init(function (photo) {
+            // 加载图片完成的回调并返回图片对象
+            // self.width=self.width/self.devicRatio;
+            // self.height=self.height/self.devicRatio;
+            // bg.callback && bg.callback(photo);
+            resolve(photo);
+          });
+        };
+        newPhoto.onerror = function (e) {
+          reject(e)
+          // console.log('图片加载出错');
+        };
+      })
+
+
+
     }
   };
   // 更改画布参数
@@ -653,7 +676,7 @@
   };
 
   // // 获取当前操作的图片
-  Canvas.prototype.getNowPhoto = function() {
+  Canvas.prototype.getNowPhoto = function () {
     return this.targetPhoto;
   };
 
@@ -662,14 +685,17 @@
     var self = this;
     var type = obj.type || 'image/jpeg';
     if (!obj.width || !obj.height) {
-      // 默认为容器分辨率
-      if (obj.callback) {
-        obj.callback(this.canvas.toDataURL(type)); // 有回调则beas64在回调给
-        return;
-      } else {
-        return this.canvas.toDataURL(type);
-      }
+      return new Promise((resolve, reject) => {
+        // 默认为容器分辨率
+        if (resolve) {
+          resolve(this.canvas.toDataURL(type)); // 有回调则beas64在回调给
+          return;
+        } else {
+          return this.canvas.toDataURL(type);
+        }
+      });
     }
+
     var newCanvas = document.querySelector('#s_newCanvas');
     if (!newCanvas) {
       var newCanvas = document.createElement('canvas');
@@ -707,11 +733,14 @@
       // 缩小参数
       ele.changeScale(1 / newScale);
     });
-    if (obj.callback) {
-      obj.callback(newCanvas.toDataURL(type));
-    } else {
-      return newCanvas.toDataURL(type);
-    }
+    return new Promise((resolve, reject) => {
+      if (resolve) {
+        resolve(newCanvas.toDataURL(type));
+      } else {
+        return newCanvas.toDataURL(type);
+      }
+    });
+
   };
   //绘制外框
   Canvas.prototype.toDataURLWrap = function (obj) {
@@ -733,24 +762,27 @@
     var newPhoto = new Image();
     newPhoto.crossOrigin = 'anonymous'; // 跨域图片
     newPhoto.src = 'image/editPic/ad-bg.png';
-    newPhoto.onload = function () {
-      // 画布背景图
-      // var bgScale = newScale * (this.canvas.width / newPhoto.width); // 背景图在合成图里的真正缩放比例，
-      // newCtx.scale(bgScale, bgScale);
-      newCtx.drawImage(newPhoto, 0, 0, newCanvas.width, newCanvas.height);
-      var newPhotob = new Image();
-      newPhotob.crossOrigin = 'anonymous'; // 跨域图片
-      newPhotob.src = obj.src;
-      newPhotob.onload = function () {
-        newCtx.drawImage(newPhotob, 21 * screenScale * self.devicRatio, 32 * screenScale * self.devicRatio);
-        if (obj.callback) {
-          obj.callback(newCanvas.toDataURL());
-        } else {
-          return newCanvas.toDataURL();
-        }
+    return new Promise((resolve, reject) => {
+      newPhoto.onload = function () {
+        // 画布背景图
+        // var bgScale = newScale * (this.canvas.width / newPhoto.width); // 背景图在合成图里的真正缩放比例，
+        // newCtx.scale(bgScale, bgScale);
+        newCtx.drawImage(newPhoto, 0, 0, newCanvas.width, newCanvas.height);
+        var newPhotob = new Image();
+        newPhotob.crossOrigin = 'anonymous'; // 跨域图片
+        newPhotob.src = obj.src;
+        newPhotob.onload = function () {
+          newCtx.drawImage(newPhotob, 21 * screenScale * self.devicRatio, 32 * screenScale * self.devicRatio);
+          if (resolve) {
+            resolve(newCanvas.toDataURL());
+          } else {
+            return newCanvas.toDataURL();
+          }
+        };
+        // newCtx.scale(1 / bgScale, 1 / bgScale);
       };
-      // newCtx.scale(1 / bgScale, 1 / bgScale);
-    };
+    });
+
   };
   //绘制时间地点img
   Canvas.prototype.toDataURLTimeCy = function (obj) {
@@ -772,28 +804,30 @@
     var newPhoto = new Image();
     newPhoto.crossOrigin = 'anonymous'; // 跨域图片
     newPhoto.src = 'image/editPic/location.png';
-    newPhoto.onload = function () {
-      // 画布背景图
-      newCtx.drawImage(newPhoto, 20, 38);
-      newCtx.font = '28px Arial';
-      newCtx.fillStyle = '#ffffff';
-      newCtx.fillText(`你好·${NowCity}`, 24, 104);
-      newCtx.font = '24px Arial';
-      newCtx.fillStyle = '#ffffff';
-      newCtx.fillText(NowTime, 20, 134);
-      newCtx.moveTo(50, 60); //设置起点状态
-      newCtx.lineTo(170 + cityLenWd, 60); //设置末端状态
-      newCtx.lineTo(170 + cityLenWd, 100); //设置末端状态
-      newCtx.lineTo(150 + cityLenWd, 120); //设置末端状态
-      newCtx.lineWidth = 3; //设置线宽状态
-      newCtx.strokeStyle = '#ffffff'; //设置线的颜色状态
-      newCtx.stroke(); //进行绘制
-      if (obj.callback) {
-        obj.callback(newCanvas.toDataURL('image/png'));
-      } else {
-        return newCanvas.toDataURL('image/png');
-      }
-    };
+    return new Promise((resolve, reject) => {
+      newPhoto.onload = function () {
+        // 画布背景图
+        newCtx.drawImage(newPhoto, 20, 38);
+        newCtx.font = '28px Arial';
+        newCtx.fillStyle = '#ffffff';
+        newCtx.fillText(`你好·${NowCity}`, 24, 104);
+        newCtx.font = '24px Arial';
+        newCtx.fillStyle = '#ffffff';
+        newCtx.fillText(NowTime, 20, 134);
+        newCtx.moveTo(50, 60); //设置起点状态
+        newCtx.lineTo(170 + cityLenWd, 60); //设置末端状态
+        newCtx.lineTo(170 + cityLenWd, 100); //设置末端状态
+        newCtx.lineTo(150 + cityLenWd, 120); //设置末端状态
+        newCtx.lineWidth = 3; //设置线宽状态
+        newCtx.strokeStyle = '#ffffff'; //设置线的颜色状态
+        newCtx.stroke(); //进行绘制
+        if (resolve) {
+          resolve(newCanvas.toDataURL('image/png'));
+        } else {
+          return newCanvas.toDataURL('image/png');
+        }
+      };
+    });
   };
   //绘制自定义文字
   Canvas.prototype.toDataURLMyEntry = function (obj) {
@@ -900,12 +934,13 @@
     // newCtx.font = '28px akaitong';
     // newCtx.fillStyle = 'red';
     // newCtx.fillText(userText, 10, posY);
-    if (obj.callback) {
-      obj.callback(newCanvas.toDataURL('image/png'));
-    } else {
-      return newCanvas.toDataURL('image/png');
-    }
-
+    return new Promise((resolve, reject) => {
+      if (resolve) {
+        resolve(newCanvas.toDataURL('image/png'));
+      } else {
+        return newCanvas.toDataURL('image/png');
+      }
+    });
   };
   // 图片对象
   function Photo(obj) {
