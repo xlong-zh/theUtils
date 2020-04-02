@@ -18,9 +18,7 @@ export function generateIndexRouter(data) {
   ];
   return indexRouter;
 }
-
 // 生成嵌套路由（子路由）
-
 function generateChildRouters(data) {
   const routers = [];
   for (var item of data) {

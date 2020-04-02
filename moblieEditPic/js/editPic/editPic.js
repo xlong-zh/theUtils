@@ -558,11 +558,11 @@
         photo.init(function (photo) {
           // 加载图片完成的回调并返回图片对象
           // obj.callback && obj.callback(photo);
-          resolve(photo);
+            resolve(photo);
         });
       };
       newPhoto.onerror = function (e) {
-        reject(e)
+          reject(e);
       };
     });
   };
@@ -588,11 +588,11 @@
         photo.init(function (photo) {
           // 加载图片完成的回调并返回图片对象
           // obj.callback && obj.callback(photo);
-          resolve(photo);
+            resolve(photo);
         });
       };
       newPhoto.onerror = function (e) {
-        reject(e)
+          reject(e);
       };
     });
 
@@ -633,11 +633,11 @@
             // self.width=self.width/self.devicRatio;
             // self.height=self.height/self.devicRatio;
             // bg.callback && bg.callback(photo);
-            resolve(photo);
+              resolve(photo);
           });
         };
         newPhoto.onerror = function (e) {
-          reject(e)
+            reject(e);
           // console.log('图片加载出错');
         };
       })

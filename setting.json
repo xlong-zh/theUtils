@@ -1,0 +1,45 @@
+{
+  // editor
+  "editor.fontSize": 14, // 字号
+  "editor.formatOnSave": true, // 保存执行格式化
+  "explorer.confirmDragAndDrop": true, // 拖动文件时确认
+  "explorer.confirmDelete": true, // 删除文件时确认
+  "editor.detectIndentation": false, // 让自己设置的缩进在所有文件中生效
+  "files.autoSave": "onFocusChange", // 自动保存
+  // "editor.fontFamily": "'monospace', monospace, 'Droid Sans Fallback'", // 字体。FuraCode 比较适合编码，支持连体
+  "editor.fontLigatures": true, // 允许连体
+  "workbench.iconTheme": "material-icon-theme",
+  "workbench.colorTheme": "Material Theme Darker High Contrast",
+
+  // prettier
+  "prettier.printWidth": 120, // 一行代码最大长度120字符
+  "editor.tabSize": 2, // tab大小2空格
+  "prettier.singleQuote": true, // 单引号
+  "prettier.semi": true, // 分号
+
+  // typescript
+  "typescript.updateImportsOnFileMove.enabled": "always", // 文件移动后更新import路径
+
+  // 装饰器
+  "javascript.implicitProjectConfig.experimentalDecorators": true,
+
+  // Formatter
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
+}
