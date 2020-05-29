@@ -217,6 +217,11 @@
     this.photoModel = obj.photoModel || 'covered'; // 默认图片载入的模式
     this.model = obj.model || 'autoHierarchy'; // 模式Cascade为添加的图片层级右添加顺序决定，autoHierarchy为层级由选中的图片为最高级
     this.devicRatio = 1; //设备缩放比例
+    this.crayonOpen = true;
+    this.crayonPhoto = false; // 雪花图
+    this.penColor = '#a82d7a';
+    this.penSize = 20;
+    this.penXY = [];
   }
   Canvas.prototype.init = function (obj) {
     // 初始话创建图片对象
@@ -273,11 +278,36 @@
     // self.painting();        // 渲染画布
     obj.callback && obj.callback(self.photos, self.photoIcons); // 初始化完成回调并返回图片对象数组
   };
+  // 渲染
+  Canvas.prototype.addClick = function (x, y, penColor, penSize, dragging = false) {
+    this.penXY.push({ x, y, penColor, penSize, dragging });
+  };
   Canvas.prototype.painting = function () {
     // 绘画
     var self = this;
     this.ctx.fillStyle = this.bgColor; // 背景色
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height); // 清空画布
+    // 涂鸦
+    if (this.penXY && this.penXY.length) {
+      this.penXY.forEach((item, idx, arr) => {
+        this.ctx.beginPath();
+        if (!item.dragging && idx) {
+          this.ctx.moveTo(arr[idx - 1].x, arr[idx - 1].y);
+        } else {
+          this.ctx.moveTo(item.x, item.y);
+        }
+        this.ctx.lineTo(item.x, item.y);
+        this.ctx.closePath();
+        this.ctx.strokeStyle = item.penColor;
+        this.ctx.lineWidth = item.penSize;
+        this.ctx.lineJoin = 'round';
+        this.ctx.stroke();
+      });
+    }
+    // 雪花背景
+    if (this.crayonOpen && this.crayonPhoto) {
+      rendering(this.ctx, this.crayonPhoto);
+    }
     if (this.bgPhotoType) {
       // 画背景图
       // var scale = this.canvas.width / this.bgPhoto.width;
@@ -551,18 +581,18 @@
           enable: obj.enable,
           customPosX: obj.customPosX || self.customPosX,
           customPosY: obj.customPosY || self.customPosY,
-          model: obj.model || self.photoModel
+          model: obj.model || self.photoModel,
         });
         self.photos.push(photo);
         self.targetPhoto = photo;
         photo.init(function (photo) {
           // 加载图片完成的回调并返回图片对象
           // obj.callback && obj.callback(photo);
-            resolve(photo);
+          resolve(photo);
         });
       };
       newPhoto.onerror = function (e) {
-          reject(e);
+        reject(e);
       };
     });
   };
@@ -581,21 +611,20 @@
           enable: obj.enable,
           customPosX: obj.customPosX || self.customPosX,
           customPosY: obj.customPosY || self.customPosY,
-          model: obj.model || self.photoModel
+          model: obj.model || self.photoModel,
         });
         self.photoIcons.push(photo);
         self.targetPhotoIcon = photo;
         photo.init(function (photo) {
           // 加载图片完成的回调并返回图片对象
           // obj.callback && obj.callback(photo);
-            resolve(photo);
+          resolve(photo);
         });
       };
       newPhoto.onerror = function (e) {
-          reject(e);
+        reject(e);
       };
     });
-
   };
 
   // 更换背景图
@@ -623,7 +652,7 @@
             enable: bg.enable,
             customPosX: bg.customPosX || self.customPosX,
             customPosY: bg.customPosY || self.customPosY,
-            model: bg.model || self.photoModel
+            model: bg.model || self.photoModel,
           });
           self.bgPhoto = photo;
           console.log(self.bgPhoto, 'self.bgPhoto');
@@ -633,18 +662,43 @@
             // self.width=self.width/self.devicRatio;
             // self.height=self.height/self.devicRatio;
             // bg.callback && bg.callback(photo);
-              resolve(photo);
+            resolve(photo);
           });
         };
         newPhoto.onerror = function (e) {
-            reject(e);
+          reject(e);
           // console.log('图片加载出错');
         };
-      })
-
-
-
+      });
     }
+  };
+  // 增加雪花底图
+  Canvas.prototype.changeCrayon = function (bg) {
+    var self = this;
+    // self.bgPhoto.src = bg.photoSrc;
+    let newPhoto = new Image();
+    newPhoto.crossOrigin = 'anonymous'; // 跨域图片
+    newPhoto.src = bg.photoSrc;
+    return new Promise((resolve, reject) => {
+      newPhoto.onload = function () {
+        var photo = new Photo({
+          canvas: self,
+          ele: newPhoto,
+          enable: bg.enable,
+          customPosX: bg.customPosX || self.customPosX,
+          customPosY: bg.customPosY || self.customPosY,
+          model: bg.model || self.photoModel,
+        });
+        self.crayonPhoto = photo;
+        photo.init(function (photo) {
+          resolve(photo);
+        });
+      };
+      newPhoto.onerror = function (e) {
+        reject(e);
+        // console.log('图片加载出错');
+      };
+    });
   };
   // 更改画布参数
   Canvas.prototype.changeParams = function (obj) {
@@ -740,7 +794,6 @@
         return newCanvas.toDataURL(type);
       }
     });
-
   };
   //绘制外框
   Canvas.prototype.toDataURLWrap = function (obj) {
@@ -782,7 +835,6 @@
         // newCtx.scale(1 / bgScale, 1 / bgScale);
       };
     });
-
   };
   //绘制时间地点img
   Canvas.prototype.toDataURLTimeCy = function (obj) {
@@ -839,7 +891,7 @@
     if (userText.indexOf(',') !== -1) {
       let userArr = userText.split(',');
       canvasRow = Math.max(userArr.length, canvasRow);
-      userArr.map(item => {
+      userArr.map((item) => {
         canvasLen = Math.max(item.length, canvasLen);
         if (item.length > 8) {
           canvasRow += 1;
@@ -848,11 +900,11 @@
         } else {
           canvasLen = Math.max(item.length, canvasLen);
         }
-      })
+      });
     } else if (userText.indexOf('，') !== -1) {
       let userArr = userText.split('，');
       canvasRow = Math.max(userArr.length, canvasRow);
-      userArr.map(item => {
+      userArr.map((item) => {
         canvasLen = Math.max(item.length, canvasLen);
         if (item.length > 8) {
           canvasRow += 1;
@@ -861,7 +913,7 @@
         } else {
           canvasLen = Math.max(item.length, canvasLen);
         }
-      })
+      });
     } else {
       if (userText.length > 8) {
         canvasRow += 1;
@@ -901,7 +953,7 @@
           newCtx.fillText(index === userArr.length - 1 ? item : item + ',', 10, posY);
           posY += 30;
         }
-      })
+      });
     } else if (userText.indexOf('，') !== -1) {
       let userArr = userText.split('，');
       userArr.map((item, index) => {
@@ -916,7 +968,7 @@
           newCtx.fillText(index === userArr.length - 1 ? item : item + '，', 10, posY);
           posY += 30;
         }
-      })
+      });
     } else {
       if (userText.length > 8) {
         canvasLen = Math.max(8, canvasLen);
@@ -969,7 +1021,7 @@
       w: 40,
       h: 40,
       deleteBut: 'topLeft', // 删除按钮所在方位默认为左上角
-      type: '' // 类型点击的是具体哪个点（bottomLeft,bottomRight,topLeft,topRight）
+      type: '', // 类型点击的是具体哪个点（bottomLeft,bottomRight,topLeft,topRight）
     };
     this.oCoords = {}; // 四边的坐标
     this.realCorners = {}; // 四点真实坐标
@@ -982,7 +1034,7 @@
       minX: 0,
       maxX: 0,
       minY: 0,
-      maxY: 0
+      maxY: 0,
     };
     this.edgeLimit = {
       // 图片在容器内触及边线时的x，y最小最大值
@@ -991,7 +1043,7 @@
       minY: -Infinity,
       maxY: Infinity,
       flag: false,
-      maxScale: Infinity
+      maxScale: Infinity,
     };
   }
   Photo.prototype.init = function (cb) {
@@ -1111,23 +1163,23 @@
         // 分别为原始坐标x,y,与中心点正x轴的夹角/即未旋转的
         x: this.coreX - this.width / 2,
         y: this.coreY + this.height / 2,
-        angle: this.originalRadius + 180
+        angle: this.originalRadius + 180,
       },
       bottomRight: {
         x: this.coreX + this.width / 2,
         y: this.coreY + this.height / 2,
-        angle: -this.originalRadius + 360
+        angle: -this.originalRadius + 360,
       },
       topRight: {
         x: this.coreX + this.width / 2,
         y: this.coreY - this.height / 2,
-        angle: this.originalRadius
+        angle: this.originalRadius,
       },
       topLeft: {
         x: this.coreX - this.width / 2,
         y: this.coreY - this.height / 2,
-        angle: -this.originalRadius + 180
-      }
+        angle: -this.originalRadius + 180,
+      },
     };
     this.sideLine();
   };
@@ -1142,7 +1194,7 @@
     for (key in this.corners) {
       this.realCorners[key] = {
         x: this.coreX + Math.cos(((this.corners[key].angle - this.rotate) / 180) * Math.PI) * this.radius,
-        y: this.coreY - Math.sin(((this.corners[key].angle - this.rotate) / 180) * Math.PI) * this.radius
+        y: this.coreY - Math.sin(((this.corners[key].angle - this.rotate) / 180) * Math.PI) * this.radius,
       };
       this.edgeLimit.minX = Math.max(
         -Math.cos(((this.corners[key].angle - this.rotate) / 180) * Math.PI) * this.radius - this.width / 2,
@@ -1150,8 +1202,8 @@
       );
       this.edgeLimit.maxX = Math.min(
         this._canvas.width -
-        Math.cos(((this.corners[key].angle - this.rotate) / 180) * Math.PI) * this.radius -
-        this.width / 2,
+          Math.cos(((this.corners[key].angle - this.rotate) / 180) * Math.PI) * this.radius -
+          this.width / 2,
         this.edgeLimit.maxX
       );
       this.edgeLimit.minY = Math.max(
@@ -1160,8 +1212,8 @@
       );
       this.edgeLimit.maxY = Math.min(
         this._canvas.height +
-        Math.sin(((this.corners[key].angle - this.rotate) / 180) * Math.PI) * this.radius -
-        this.height / 2,
+          Math.sin(((this.corners[key].angle - this.rotate) / 180) * Math.PI) * this.radius -
+          this.height / 2,
         this.edgeLimit.maxY
       );
       this.edgeLimit.flag = true;
@@ -1169,19 +1221,19 @@
     // 确定图片四条边的坐标
     this.oCoords.bottomLine = {
       o: this.realCorners.bottomLeft,
-      d: this.realCorners.bottomRight
+      d: this.realCorners.bottomRight,
     };
     this.oCoords.RightLine = {
       o: this.realCorners.bottomRight,
-      d: this.realCorners.topRight
+      d: this.realCorners.topRight,
     };
     this.oCoords.topLine = {
       o: this.realCorners.topRight,
-      d: this.realCorners.topLeft
+      d: this.realCorners.topLeft,
     };
     this.oCoords.leftLine = {
       o: this.realCorners.topLeft,
-      d: this.realCorners.bottomLeft
+      d: this.realCorners.bottomLeft,
     };
     // 获取图片最大最小坐标
     this.hornLimit.minX = Math.min(
@@ -1391,7 +1443,7 @@
       width: this.width,
       height: this.height,
       actualWidth: this.actualWidth,
-      actualHeight: this.actualHeight
+      actualHeight: this.actualHeight,
     };
   };
 
