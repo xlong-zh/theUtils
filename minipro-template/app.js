@@ -26,16 +26,16 @@ App({
               // 可以将 res 发送给后台解码出 unionId
               this.globalData.loginInfo = res;
               this.globalData.userInfo = res.userInfo;
-              // if (this.globalData.code) {
-              //   this.giveData(this.globalData.code, res.userInfo, this.globalData.loginInfo);
-              // } else {
-              //   wx.login({
-              //     success: res => {
-              //       this.globalData.code = res.code;
-              //       this.giveData(this.globalData.code, this.globalData.userInfo, this.globalData.loginInfo);
-              //     }
-              //   });
-              // }
+              if (this.globalData.code) {
+                this.giveData(this.globalData.code, res.userInfo, this.globalData.loginInfo);
+              } else {
+                wx.login({
+                  success: res => {
+                    this.globalData.code = res.code;
+                    this.giveData(this.globalData.code, this.globalData.userInfo, this.globalData.loginInfo);
+                  }
+                });
+              }
               // 由于 getUserInfo 是网络请求，可能会在 Page.onLoad 之后才返回
               // 所以此处加入 callback 以防止这种情况
               if (this.userInfoReadyCallback) {
@@ -77,7 +77,7 @@ App({
         },
         fail(e) {
           wx.showToast({
-            title: '登录失败请重新登陆',
+            title: '登录失败请重新点击头像',
             icon: 'none',
             duration: 1500
           });

@@ -19,3 +19,91 @@
 .usermotto {
   margin-top: 200px;
 }
+
+.container {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+/* 头部 */
+.header {
+  width: 100%;
+  padding: 40rpx 20rpx;
+  background-color: #46a1e3;
+
+}
+
+.header-card {
+  padding: 30rpx;
+  border-radius: 20rpx;
+  background-color: #fff;
+  overflow: hidden;
+  box-shadow: 4rpx 12rpx 10rpx rgba(112, 112, 112, 0.3);
+  z-index: 9;
+}
+
+.header-user {
+  display: flex;
+  align-items: center;
+  margin-bottom: 40rpx;
+}
+
+.header-user button::after {
+  border: none;
+}
+
+.header-user .header-image-box {
+  width: 130rpx !important;
+  height: 130rpx !important;
+  padding: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2rpx solid #dddddd;
+}
+
+.header-user-image {
+  width: 100%;
+  height: 100%;
+}
+
+.header-user-name {
+  margin-left: 20rpx;
+  font-size: 40rpx;
+  font-weight: bold;
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+
+.header-list {
+  display: flex;
+  align-items: center;
+}
+
+.header-list-li {
+  width: 33.3%;
+  text-align: center;
+  font-size: 28rpx;
+  color: #999999;
+}
+
+.header-list-wall {
+  width: 2rpx;
+  height: 60rpx;
+  background-color: #999999;
+}
+
+.header-list-li-num {
+  font-size: 38rpx;
+  font-weight: bold;
+  color: #333333;
+}
+
+/* 列表 */
+.list-wrap {
+  width: 100%;
+  background-color: #f5f5f5;
+  z-index: 8;
+}

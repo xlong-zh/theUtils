@@ -10,6 +10,9 @@ Page({
   },
 
   onLoad: function () {
+    this.setData({
+      hasUserInfo: false
+    })
     if (app.globalData.userInfo) {
       this.setData({
         userInfo: app.globalData.userInfo,
@@ -38,9 +41,9 @@ Page({
     }
   },
   //事件处理函数
-  bindViewTap: function () {
+  navToMyInfo(url) {
     wx.navigateTo({
-      url: '../logs/logs'
+      url: '/pages/my/myInfo/myInfo'
     })
   },
   // 点击登陆

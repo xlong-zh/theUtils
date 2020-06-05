@@ -1,10 +1,13 @@
 {
   "pages": [
+    "pages/my/my",
     "pages/index/index",
-    "pages/logs/logs",
-    "pages/my/my"
+    "pages/my/myCorrect/myCorrect",
+    "pages/my/pointsLogs/pointsLogs",
+    "pages/my/activeRules/activeRules",
+    "pages/my/mySetting/mySetting",
+    "pages/my/myInfo/myInfo"
   ],
-
   "tabBar": {
     "color": "#C8C8CA",
     "selectedColor": "#0B0B0B",

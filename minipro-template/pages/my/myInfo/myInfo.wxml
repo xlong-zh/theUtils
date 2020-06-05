@@ -1,0 +1,6 @@
+<view>
+	<i-cell-group>
+		<i-cell title="姓名" value="123" is-link bind:click="handleName"></i-cell>
+		<i-cell title="电话" value="123" is-link bind:click="handlePhone"></i-cell>
+	</i-cell-group>
+</view>

@@ -1,13 +1,44 @@
 <!--my.wxml-->
 <view class="container">
-  <view class="userinfo">
-    <button wx:if="{{!hasUserInfo && canIUse}}" open-type="getUserInfo" bindgetuserinfo="getUserInfo"> 获取头像昵称 </button>
-    <block wx:else>
-      <image bindtap="bindViewTap" class="userinfo-avatar" src="{{userInfo.avatarUrl}}" mode="cover"></image>
-      <text class="userinfo-nickname">{{userInfo.nickName}}</text>
-    </block>
-  </view>
-  <view class="usermotto">
-    <text class="user-motto">{{motto}}</text>
-  </view>
+	<view class="header">
+		<view class="header-card">
+			<view wx:if="{{hasUserInfo}}" class="header-user">
+				<button class="header-image-box" open-type="getUserInfo" bindgetuserinfo='getUserInfo'>
+					<image class="header-user-image" src="{{userInfo.avatarUrl}}"></image>
+				</button>
+				<view class="header-user-name">{{userInfo.nickName}}</view>
+				<i-icon type="enter" size="28" color="#80848f" catchtap="navToMyInfo" />
+			</view>
+			<view wx:else class="header-user">
+				<button class="header-image-box" open-type="getUserInfo" bindgetuserinfo='getUserInfo'>
+					<image class="header-user-image" src="/images/icon/avatar.png"></image>
+				</button>
+				<view class="header-user-name">游客</view>
+			</view>
+			<view class="header-list">
+				<view class="header-list-li">
+					<view class="header-list-li-num">321</view>
+					<view>积分</view>
+				</view>
+				<view class="header-list-wall"></view>
+				<view class="header-list-li">
+					<view class="header-list-li-num">12</view>
+					<view>纠错</view>
+				</view>
+				<view class="header-list-wall"></view>
+				<view class="header-list-li">
+					<view class="header-list-li-num">1</view>
+					<view>点赞</view>
+				</view>
+			</view>
+		</view>
+	</view>
+	<view class="list-wrap">
+		<i-cell-group>
+			<i-cell title="我的纠错" is-link url="/pages/my/myCorrect/myCorrect"></i-cell>
+			<i-cell title="积分记录" is-link url="/pages/my/pointsLogs/pointsLogs"></i-cell>
+			<i-cell title="活动规则" is-link url="/pages/my/activeRules/activeRules"></i-cell>
+			<i-cell title="设置" is-link url="/pages/my/mySetting/mySetting"></i-cell>
+		</i-cell-group>
+	</view>
 </view>
